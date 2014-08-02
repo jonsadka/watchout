@@ -70,29 +70,7 @@ svg.selectAll('.enemy')
     return d[1];
   })
   .attr('r', function(){ return scaleEnemy(window.outerWidth) + Math.floor(Math.random()*15); } )
-
-// var svgPaths = svg.selectAll('.enemies').each(
-//     d3.select(this).data(enemyShape)
-//     .append('svg')
-//     // .attr("d", function(d) { return d.d; });
-
-//   );
-
-// ENEMY Image
-// svg.selectAll('.enemy')
-//   // .data( elementPos(scaleEnemyCount(window.innerWidth)) )
-//   .data( elementPos(scaleEnemyCount(3)) )
-//   .enter()
-//   .append('svg:image')
-//   .attr("class", "enemy")
-//   .attr('x', function(d) {
-//     return d[0];
-//   })
-//   .attr('y', function(d) {
-//     return d[1];
-//   })
-//   .attr('r', function(){ return scaleEnemy(window.outerWidth) + Math.floor(Math.random()*15); } )
-
+  .attr('fill','red');
 
 // PLAYER creation
 svg.selectAll('player')
@@ -110,16 +88,17 @@ svg.selectAll('player')
 svg.selectAll('.food')
   .data( elementPos(2) )
   .enter()
-  .append('circle')
+  .append('svg:image')
   .attr("class", "food")
-  .attr('cx', function(d) {
+  .attr('x', function(d) {
     return d[0];
   })
-  .attr('cy', function(d) {
+  .attr('y', function(d) {
     return d[1];
   })
-  .attr('r', 5 )
-  .attr('fill', 'green');
+  .attr('width', 50)
+  .attr('height', 50)
+  .attr("xlink:href", "diamond.svg");
 
 
 // SCOREBOARD creation
@@ -145,13 +124,13 @@ var moveEnemy = function() {
   });
 
   d3.selectAll('.food').each(function(){
-    var moveCX = Number(d3.select(this).attr('cx')) + Math.floor(Math.random()*100) - Math.floor(Math.random()*100);
-    var moveCY = Number(d3.select(this).attr('cy')) + Math.floor(Math.random()*100) - Math.floor(Math.random()*100);
+    var moveCX = Number(d3.select(this).attr('x')) + Math.floor(Math.random()*100) - Math.floor(Math.random()*100);
+    var moveCY = Number(d3.select(this).attr('y')) + Math.floor(Math.random()*100) - Math.floor(Math.random()*100);
 
     d3.select(this)
       .transition().duration(scaleEnemySpeed(window.outerWidth))
-      .attr('cx', moveCX)
-      .attr('cy', moveCY);
+      .attr('x', moveCX)
+      .attr('y', moveCY);
   });
 
 };
@@ -164,9 +143,9 @@ var checkClash = function() {
 
   // loop through each food and check if outer edge collides with player
   d3.selectAll('.food').each(function(){
-    var foodPosX = d3.select(this).attr('cx');
-    var foodPosY = d3.select(this).attr('cy');
-    var foodSize = d3.select(this).attr('r');
+    var foodPosX = d3.select(this).attr('x');
+    var foodPosY = d3.select(this).attr('y');
+    var foodSize = d3.select(this).attr('width');
     var distanceBetween =  Math.sqrt( Math.pow((playerPosX - foodPosX),2) + Math.pow((playerPosY - foodPosY),2) );
     var collideDistance = Number(playerSize) + Number(foodSize);
 
