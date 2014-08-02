@@ -1,5 +1,9 @@
 /* your beautiful css styling goes here! */
-
-/* Note: an asteroid image is included in this repo. 
+body {
+  margin:0;
+  padding:0;
+  overflow:hidden;
+}
+/* Note: an asteroid image is included in this repo.
 Feel free to use it if you like. */
 
