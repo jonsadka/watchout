@@ -25,9 +25,6 @@ var scalePlayer = d3.scale.linear()
                           .domain([0, 1280])
                           .range([10, 10]);
 
-var enemyShape = "M70.151,80.099c-10.254,3.286-21.438-1.19-26.59-10.641l-0.465-0.852l-8.659,4.561l0.472,0.875c7.366,13.65,23.444,20.118,38.23,15.38c16.945-5.43,26.314-23.633,20.884-40.579l-0.3-0.937l-9.323,2.987l0.3,0.937C88.482,63.635,81.955,76.316,70.151,80.099z";
-
-
 // generates a set amount of enemies with unique locations
 var elementPos = function(numElements){
   var allElements = [];
@@ -47,8 +44,7 @@ var dragMove = function(d){
   .attr('cy', d3.event.y);
 };
 // create drag behavior
-var drag = d3.behavior.drag()
-             .on('drag', dragMove);
+var drag = d3.behavior.drag().on('drag', dragMove);
 
 // CONTAINER creation
 var svg = d3.select('.stage')
@@ -58,8 +54,7 @@ var svg = d3.select('.stage')
 
 // ENEMY creation
 svg.selectAll('.enemy')
-  // .data( elementPos(scaleEnemyCount(window.innerWidth)) )
-  .data( elementPos(scaleEnemyCount(3)) )
+  .data( elementPos(scaleEnemyCount(window.innerWidth)) )
   .enter()
   .append('circle')
   .attr("class", "enemy")
@@ -70,7 +65,7 @@ svg.selectAll('.enemy')
     return d[1];
   })
   .attr('r', function(){ return scaleEnemy(window.outerWidth) + Math.floor(Math.random()*15); } )
-  .attr('fill','red');
+  .attr('fill','#01B0F0');
 
 // PLAYER creation
 svg.selectAll('player')
@@ -81,25 +76,23 @@ svg.selectAll('player')
   .attr('cx', width/2 )
   .attr('cy', height/2 )
   .attr('r', scalePlayer(window.outerWidth))
-  .attr('fill', 'yellow')
+  .attr('fill', '#FF358B')
   .call(drag);
 
 // FOOD creation
 svg.selectAll('.food')
   .data( elementPos(2) )
   .enter()
-  .append('svg:image')
+  .append('circle')
   .attr("class", "food")
-  .attr('x', function(d) {
+  .attr('cx', function(d) {
     return d[0];
   })
-  .attr('y', function(d) {
+  .attr('cy', function(d) {
     return d[1];
   })
-  .attr('width', 50)
-  .attr('height', 50)
-  .attr("xlink:href", "diamond.svg");
-
+  .attr('r', 5 )
+  .attr('fill', '#AEEE00');
 
 // SCOREBOARD creation
 svg.selectAll('scoreboard')
@@ -124,15 +117,14 @@ var moveEnemy = function() {
   });
 
   d3.selectAll('.food').each(function(){
-    var moveCX = Number(d3.select(this).attr('x')) + Math.floor(Math.random()*100) - Math.floor(Math.random()*100);
-    var moveCY = Number(d3.select(this).attr('y')) + Math.floor(Math.random()*100) - Math.floor(Math.random()*100);
+    var moveCX = Number(d3.select(this).attr('cx')) + Math.floor(Math.random()*100) - Math.floor(Math.random()*100);
+    var moveCY = Number(d3.select(this).attr('cy')) + Math.floor(Math.random()*100) - Math.floor(Math.random()*100);
 
     d3.select(this)
       .transition().duration(scaleEnemySpeed(window.outerWidth))
-      .attr('x', moveCX)
-      .attr('y', moveCY);
+      .attr('cx', moveCX)
+      .attr('cy', moveCY);
   });
-
 };
 
 var checkClash = function() {
@@ -143,21 +135,26 @@ var checkClash = function() {
 
   // loop through each food and check if outer edge collides with player
   d3.selectAll('.food').each(function(){
-    var foodPosX = d3.select(this).attr('x');
-    var foodPosY = d3.select(this).attr('y');
-    var foodSize = d3.select(this).attr('width');
+    var foodPosX = d3.select(this).attr('cx');
+    var foodPosY = d3.select(this).attr('cy');
+    var foodSize = d3.select(this).attr('r');
     var distanceBetween =  Math.sqrt( Math.pow((playerPosX - foodPosX),2) + Math.pow((playerPosY - foodPosY),2) );
     var collideDistance = Number(playerSize) + Number(foodSize);
 
     // if collides, add to collisions, save high score if applies and reset current score
     if ( distanceBetween < collideDistance ){
+
+      // increase the score by 150
+      stats.currentScore = Number(stats.currentScore) + 150;
+
+      // get random position and move food to that spot
       svg.select('.player').attr('r', scalePlayer(window.outerWidth));
-      stats.currentScore += 100;
+      var moveCX = randomPos(window.innerWidth);
+      var moveCY = randomPos(window.innerHeight);
+      d3.select(this).transition().duration(1).attr('cx', moveCX).attr('cy', moveCY);
     }
 
   });
-
-
 
   // loop through each enemy and check if outer edge collides with player
   d3.selectAll('.enemy').each(function(){
@@ -171,7 +168,9 @@ var checkClash = function() {
     if ( distanceBetween < collideDistance ){
       stats.collisions++;
       pause = true;
-      svg.select('.player').attr('r', scalePlayer(window.outerWidth));
+      svg.select('.player').attr('r', scalePlayer(window.outerWidth))
+                           .transition().attr('fill', 'none')
+                           .transition().attr('fill', 'yellow');
       if(stats.currentScore > stats.highScore) {
         stats.highScore = stats.currentScore;
       }
@@ -188,14 +187,18 @@ var updateScore = function() {
      .text(function(d){ return d; } );
 };
 
-
+// update scoreboard and add tally over time
 setInterval( function(){ updateScore(); }, 10);
-setInterval( function(){ stats.currentScore += 1; }, 10);
+setInterval( function(){ stats.currentScore += 1; }, 200);
+
+// increse player size over time and moves enemy randomly
 setInterval( function(){
   var rad = Number(d3.selectAll('.player').attr('r')) + 1.5;
   d3.selectAll('.player').transition().attr('r', rad );
-  return moveEnemy();
+  moveEnemy();
 }, scaleEnemySpeed(window.outerWidth));
+
+// check any collisions between elements in the game
 var enemyCheck = setInterval( function(){
   if(!pause) {
     return checkClash();
