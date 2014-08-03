@@ -1,7 +1,8 @@
 // start slingin' some d3 here.
 //
 // Our game stage:
-var bpm = 180;
+//
+var bpm = 128;
 var rate = 60/bpm*1000;
 var width = window.innerWidth;
 var height = window.innerHeight;
