@@ -1,6 +1,6 @@
 #Watch out!
 
-Keep your player away from the randomly-moving enemies while trying to eat the green food. This game uses D3 to visualize the player, enemy and food objects.
+Keep yoursdasadayer away from the randomly-moving enemies while trying to eat the green food. This game uses D3 to visualize the player, enemy and food objects.
 
 ![Imgur](http://i.imgur.com/zkolSlx.png)
 
